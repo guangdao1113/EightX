@@ -32,7 +32,9 @@ public class OrderService {
 
         ScanResponse scanResponse = dynamoDbClient.scan(scanRequest);
         List<Order> orders = convertToOrders(scanResponse.items());
-        orderRepository.saveAll(orders);
+        orders.stream()
+                .filter(order -> orderRepository.findByOrderDate(order.getOrderDate()).isEmpty())
+                .forEach(orderRepository::save);
     }
 
     private List<Order> convertToOrders(List<Map<String, AttributeValue>> items) {
@@ -72,5 +74,9 @@ public class OrderService {
         }
 
         return orders;
+    }
+
+    public boolean isNumberEven(Integer number) {
+        return number % 2 == 0;
     }
 }
